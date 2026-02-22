@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Structural Analysis & Design Exam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom scrollbar for sidebar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased overflow-hidden">
+
+    <!-- INTRO SCREEN -->
+    <div id="intro-screen" class="min-h-screen flex items-center justify-center p-6 w-full absolute inset-0 z-50 bg-slate-100 overflow-y-auto">
+        <div class="max-w-2xl w-full bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden my-auto">
+            <div class="bg-slate-800 p-8 text-center text-white">
+                <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-2">CEP 400B: Structural Analysis & Design</h1>
+                <p class="text-slate-300 text-lg">Fourth Examination Simulator</p>
+            </div>
+            <div class="p-8">
+                <div class="flex items-center justify-center space-x-6 mb-8 text-slate-600 font-medium">
+                    <div class="flex items-center"><i data-lucide="file-text" class="w-5 h-5 mr-2"></i> 72 Questions</div>
+                    <div class="flex items-center"><i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Multiple Choice</div>
+                </div>
+                
+                <p class="text-slate-600 mb-8 text-center leading-relaxed max-w-lg mx-auto">
+                    Select your preferred mode.<br>
+                    <strong>Practice Mode</strong> reveals the correct answer immediately after you make a choice.<br>
+                    <strong>Exam Mode</strong> hides all feedback until you submit the entire test.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button onclick="startApp('practice')" class="flex flex-col items-center p-6 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition-colors duration-200 text-blue-800 group">
+                        <i data-lucide="refresh-cw" class="w-8 h-8 mb-3 text-blue-600 group-hover:rotate-180 transition-transform duration-500"></i>
+                        <span class="font-semibold text-lg">Practice Mode</span>
+                        <span class="text-sm text-blue-600/80 mt-1">Instant Feedback</span>
+                    </button>
+                    
+                    <button onclick="startApp('exam')" class="flex flex-col items-center p-6 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-colors duration-200 text-slate-800 group">
+                        <i data-lucide="play" class="w-8 h-8 mb-3 text-slate-600 group-hover:scale-110 transition-transform duration-200"></i>
+                        <span class="font-semibold text-lg">Exam Mode</span>
+                        <span class="text-sm text-slate-500 mt-1">Feedback at the end</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="hidden flex-col h-screen w-full relative">
+        <!-- Header -->
+        <header class="bg-slate-800 text-white shadow-md z-30 flex-shrink-0">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center">
+                    <button onclick="toggleSidebar()" class="p-2 mr-2 hover:bg-slate-700 rounded-lg lg:hidden">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="goHome()" class="p-2 mr-2 hover:bg-slate-700 rounded-lg hidden sm:block" title="Back to Home">
+                        <i data-lucide="home" class="w-5 h-5"></i>
+                    </button>
+                    <h1 class="font-bold tracking-wide truncate">Structural Analysis & Design</h1>
+                    <span id="header-mode-badge" class="ml-4 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-slate-700 text-blue-300 hidden sm:inline-block">
+                        Mode
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="header-progress" class="text-sm font-medium text-slate-300">
+                        0 / 72 Answered
+                    </div>
+                    <button onclick="submitExam()" id="header-submit-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded text-sm font-semibold transition">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="flex flex-1 overflow-hidden relative">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="sidebar-transition absolute lg:relative z-20 w-72 h-full bg-white border-r border-slate-200 shadow-2xl lg:shadow-none flex flex-col flex-shrink-0 -translate-x-full lg:translate-x-0">
+                <div class="p-4 border-b border-slate-100 bg-white z-10 flex justify-between items-center flex-shrink-0">
+                    <h2 class="font-bold text-slate-700">Questions</h2>
+                    <button onclick="toggleSidebar()" class="lg:hidden p-1 text-slate-400 hover:bg-slate-100 rounded">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="p-4 grid grid-cols-4 gap-2 overflow-y-auto flex-1" id="sidebar-grid">
+                    <!-- Buttons injected via JS -->
+                </div>
+            </aside>
+
+            <!-- Overlay for mobile sidebar -->
+            <div id="sidebar-overlay" onclick="toggleSidebar()" class="hidden absolute inset-0 bg-slate-900/50 z-10 lg:hidden backdrop-blur-sm transition-opacity"></div>
+
+            <!-- Question Area -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50 flex flex-col items-center">
+                <div class="w-full max-w-3xl pb-20">
+                    
+                    <!-- Situation Box -->
+                    <div id="situation-box" class="hidden mb-6 bg-yellow-50/50 border border-yellow-200 p-5 rounded-xl flex items-start">
+                        <i data-lucide="alert-circle" class="w-5 h-5 text-yellow-600 mr-3 mt-0.5 flex-shrink-0"></i>
+                        <p id="situation-text" class="text-sm text-yellow-800 leading-relaxed font-serif"></p>
+                    </div>
+
+                    <!-- Question Box -->
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 mb-8">
+                        <div id="question-number" class="flex items-center text-slate-400 font-semibold mb-4 text-sm tracking-widest uppercase">
+                            Question 1 of 72
+                        </div>
+                        <h2 id="question-text" class="text-xl md:text-2xl font-medium text-slate-800 leading-snug mb-8">
+                            Question text here?
+                        </h2>
+
+                        <!-- Options Container -->
+                        <div id="options-container" class="space-y-3">
+                            <!-- Options injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Navigation Controls -->
+                    <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                        <button onclick="prevQuestion()" id="btn-prev" class="flex items-center px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-lg transition disabled:opacity-30 disabled:hover:bg-transparent">
+                            <i data-lucide="chevron-left" class="w-5 h-5 mr-1"></i> Previous
+                        </button>
+                        
+                        <button onclick="nextQuestion()" id="btn-next" class="flex items-center px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-lg transition disabled:opacity-30 disabled:hover:bg-transparent">
+                            Next <i data-lucide="chevron-right" class="w-5 h-5 ml-1"></i>
+                        </button>
+
+                        <button onclick="submitExam()" id="btn-finish" class="hidden flex items-center px-6 py-2 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-700 transition">
+                            Finish
+                        </button>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="results-screen" class="hidden min-h-screen bg-slate-50 p-6 lg:p-12 absolute inset-0 z-40 overflow-y-auto">
+        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mt-8 mb-20">
+            <div class="bg-slate-800 text-white p-8 text-center relative">
+                <h2 class="text-3xl font-bold mb-2">Exam Results</h2>
+                <div id="score-percentage" class="text-5xl font-black text-blue-400 my-6">100%</div>
+                <p id="score-text" class="text-slate-300 text-lg">You scored 72 out of 72</p>
+            </div>
+            
+            <div class="p-8">
+                <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+                    <h3 class="text-xl font-bold text-slate-800">Detailed Review</h3>
+                    <button onclick="goHome()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg transition flex items-center">
+                        <i data-lucide="home" class="w-4 h-4 mr-2"></i> Back to Home
+                    </button>
+                </div>
+
+                <div id="results-list" class="space-y-6">
+                    <!-- Results injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION LOGIC -->
+    <script>
+        // --- DATA: All 72 Questions Transcribed and Mapped ---
+        const sit1 = "Situation 1: A beam 3 m long is simply supported at its ends. The beam is loaded with a downward vertical load of 200 N at a point 2 m from the left support.";
+        const sit2 = "Situation 2: A continuous beam has two spans, the left span being 4 m long and the right span is 6 m long. The beam is restrained at the left most support, hinged at the interior support, and roller at the rightmost support. The beam carries a concentrated load of 40 kN at the middle of the 4-m span and a uniform load of 5 kN/m throughout the 6-m span.";
+        const sit3 = "Situation 3: A 600 mm x 600 mm column carries a total live load of 1200 kN and a total dead load of 1500 kN. The column is to be supported by a rectangular spread footing whose width is limited to 3 m and whose bottom is 2 m below the ground surface. Allowable soil bearing capacity at the base of the footing is 230 kPa. Unit weight of soil above footing is 16 kN/m³ and unit weight of concrete is 23.5 kN/m³. Assume f'c = 28 MPa and fy = 275 MPa.";
+        const sit4 = "Situation 4: A propped beam 6 m long carries a load that varies uniformly from 10 kN/m at the fixed end to zero at the simple support.";
+        const sit5 = "Situation 5: A place truss is loaded as shown. (Refer to original figure). 6 @ 10.50 m = 63 m total length. Loads: 1200 N at J (inclined 35 degrees), 480 N at D, 480 N at E.";
+        const sit6 = "Situation 6: The 300-Newton block as shown in the figure is at rest on the rough horizontal place before the force P is applied at t = 0. The force P = 80t, where P is in Newtons and t is in seconds.";
+        const sit7 = "Situation 7: Consider the force system as shown in the original figure.";
+        const sit8 = "Situation 8: The shear diagram of a beam is shown in the original figure.";
+        const sit9 = "Situation 9: A reinforced concrete T-beam has the following properties: Flange width, b = 1370 mm; Flange thickness, ty = 130 mm; Width of web, bw = 300 mm; Effective depth, d = 610 mm; As = 2950 mm²; fc = 28 MPa; fy = 414 MPa";
+        const sit10 = "Situation 10: Classify each of the trusses in the figure as stable, unstable, statically determinate, or statically indeterminate. The trusses are subjected to arbitrary external loadings that are assumed to be known and can act anywhere on the trusses.";
+        const sit11 = "Situation 11: For the truss shown on the figure, A (area) and E is the same for all the members.";
+        const sit12 = "Situation 12: A simply supported beam is acted upon by a concentrated load and a concentrated moment as shown in the figure. The product EI = 1,000,000 where E is the modulus of elasticity in pascals and I is the moment of inertia in meter to the fourth power. Analyze the beam using the Area-moment method.";
+        const sit13 = "Situation 13: A reinforced concrete rectangular beam has a width of 250 mm and an effective depth of 500 mm. The beam is required to carry an ultimate moment of 300 kN-m. It is required to design the steel reinforcement of the beam. Compression reinforcement, if necessary, will be placed at a depth of 75 mm from the extreme compression concrete. Assume fy = 275.8 MPa and f'c = 35 MPa.";
+        const sit14 = "Situation 14: A prestressed concrete beam 400 mm x 800 mm is to carry a uniform load of 40 kN/m on a simple span of 11 m. The beam is prestressed to 2200 kN applied 200 mm below the neutral axis.";
+        const sit15 = "Situation 15: According to Section 4.5.1.3.1 of NSCP, on gross section of axially loaded compression members whose cross-sections meet with the provisions of the code, when KL/r < Cc: Fa = [1 - (KL/r)² / (2Cc²)] (Fy / FS). FS = 5/3 + 3(KL/r) / (8Cc) - (KL/r)³ / (8Cc³). When KL/r exceeds Cc: Fa = 12π²E / (23(KL/r)²). A column 3 m long and pinned at both ends carries an axial load of 190 kN. Use A36 steel with Fy = 248 MPa and E = 200,000 MPa.";
+        const sit16 = "Situation 16: According to Section 5.3.3.2 of the NSCP, the nominal maximum size of coarse aggregates shall not be larger than: a) 1/5 narrowest dimension between forms, b) 1/3 depth of slabs, c) 3/4 minimum clear spacing between bars. Section 5.7.6: Minimum clear spacing between parallel bars in a layer shall be db, but not less than 25mm. (Refer to original beam section figure).";
+        const sit17 = "Situation 17: For the steel section shown in the original figure:";
+        const sit18 = "Situation 18: A riveted lap joint is shown in the figure. The rivets have 16 mm diameters, and the permissible stresses are 124 MPa for shear in rivets, 296 MPa for bearing, and 165 MPa for tension (on net area) in plates. The plates are 10 mm thick. Assume hole diameter be 1.5 mm larger than the rivet diameter.";
+
+        const quizData = [
+            { id: 1, sit: sit1, q: "The maximum deflection is located at what distance from the left support?", opts: ["1.52 m", "1.63 m", "2.15 m", "2 m"], ans: 1 },
+            { id: 2, sit: sit1, q: "Calculate the maximum deflection assuming E = 50 GPa and I = 1 x 10⁶ mm⁴.", opts: ["1.5 mm", "2.4 mm", "3.5 mm", "2.9 mm"], ans: 3 },
+            { id: 3, sit: sit1, q: "Calculate the rotation of the beam at the right support.", opts: ["0.004444 radian", "0.00111 radian", "0.00333 radian", "0.00222 radian"], ans: 2 },
+            { id: 4, sit: null, q: "A square tied column 400 mm on each side is reinforced with 8-25 mm bars with fy = 275 MPa. Assuming f'c = 22 MPa, determine the ultimate axial load capacity of this column in kN.", opts: ["3524", "2239", "1856", "3214"], ans: 1 },
+            { id: 5, sit: null, q: "A round spiral column is to support an axial dead load of 800 kN and an axial live load of 1350 kN. Assuming that 2% longitudinal steel is desired, f'c = 27.6 MPa and fy = 414 MPa, the required column diameter is:", opts: ["470 mm", "450 mm", "550 mm", "320 mm"], ans: 0 },
+            { id: 6, sit: null, q: "The steel ratio for a 9-mm diameter spiral reinforcement for a round column 600 mm in diameter with fy = 200 MPa and f'c = 30 MPa is: (assume concrete cover of 40 mm)", opts: ["0.022", "0.032", "0.036", "0.042"], ans: 0 },
+            { id: 7, sit: null, q: "The water cement ratio in concrete is:", opts: ["The ratio of the volume of water to the weight of cement.", "The ratio of the volume of water to the volume of cement.", "The ratio of the weight of water to the weight of the cement.", "The ratio of the weight of water to the volume of cement."], ans: 2 },
+            { id: 8, sit: null, q: "The most popular non-destructive test for concrete strength is a spring-loaded device, which derives a steel probe against a concrete surface... The test is known as:", opts: ["Pulse Velocity", "Rebound Hammer", "Penetration Resistance", "Pull-out"], ans: 1 },
+            { id: 9, sit: null, q: "These are materials containing finely divided silica, maybe added to concrete to take advantage of these cements formed when silica reacts with free lime... substituting this for part of the cement can have advantage in mass concrete if the generation of heat needs to be reduced.", opts: ["Retardant", "Lime", "Pozzolan", "Plasticizer"], ans: 2 },
+            { id: 10, sit: sit2, q: "Determine the moment at the restrained end in kN-m.", opts: ["-18.33", "-20.67", "-17.67", "-19.17"], ans: 3 },
+            { id: 11, sit: sit2, q: "Determine the moment at the interior support in kN-m.", opts: ["-21.67", "-26.67", "-19.67", "-20.33"], ans: 0 },
+            { id: 12, sit: sit2, q: "Determine the vertical reaction at the interior support in kN.", opts: ["42.5", "35.2", "39.23", "28.6"], ans: 2 },
+            { id: 13, sit: sit3, q: "Assuming thickness of footing to be 700 mm, determine the effective soil bearing capacity of the soil in kPa.", opts: ["180.43", "192.75", "207.12", "186.55"], ans: 1 },
+            { id: 14, sit: sit3, q: "Determine the required length of footing rounded-off to the nearest 0.1 m.", opts: ["3.8 m", "4.9 m", "4.7 m", "4.3 m"], ans: 2 },
+            { id: 15, sit: sit3, q: "The required depth of footing based on wide beam shear is nearest to:", opts: ["503 mm", "521 mm", "465 mm", "577 mm"], ans: 3 },
+            { id: 16, sit: sit3, q: "The required depth of footing based on punching shear is nearest to:", opts: ["547 mm", "514 mm", "591 mm", "602 mm"], ans: 0 },
+            { id: 17, sit: sit3, q: "Determine the required number of 28-mm bars needed along the short direction of the footing.", opts: ["22", "20", "16", "18"], ans: 0 },
+            { id: 18, sit: sit3, q: "Determine the required number of 28-mm bars needed along the long direction of the footing.", opts: ["18", "20", "288", "24"], ans: 3 },
+            { id: 19, sit: null, q: "Design the span length for which the bending and the shear capacity for a 100 mm x 300 mm beam is reached simultaneously when the beam is loaded with a uniform load throughout the span. The allowable stresses in bending and shear are fb = 12.5 MPa and fv = 0.83 MPa.", opts: ["3.678 m", "4.518 m", "4.235 m", "4.984 m"], ans: 1 },
+            { id: 20, sit: null, q: "A wooden log is to be used as a footbridge to span a gap. The log is required to support a concentrated load of 30 kN at midspan. If the allowable stress in shear is 0.7 MPa, what diameter of log that would be needed?", opts: ["191 mm", "270 mm", "94.4 mm", "135 mm"], ans: 0 },
+            { id: 21, sit: null, q: "A cantilever beam 3 m long is subjected to a uniformly distributed load of 30 kN per meter of length. The allowable working stress in either tension or compression is 150 MPa. If the cross section is to be rectangular, determine the dimensions if the height is to be twice as great as the width.", opts: ["90 mm x 180 mm", "130 mm x 260 mm", "100 mm x 200 mm", "110 mm x 220 mm"], ans: 3 },
+            { id: 22, sit: sit4, q: "Which of the following most nearly gives the vertical reaction at the simple support in kN.", opts: ["4", "7", "5", "6"], ans: 3 },
+            { id: 23, sit: sit4, q: "Which of the following most nearly gives the moment at the fixed end in kN-m.", opts: ["-24", "-7", "-5", "-6"], ans: 0 },
+            { id: 24, sit: sit4, q: "Which of the following most nearly gives the location of the maximum deflection measured from the simple support.", opts: ["2.68 m", "3.42 m", "4.12 m", "1.15 m"], ans: 0 },
+            { id: 25, sit: sit5, q: "Which of the following most nearly gives the reaction at G, in Newtons.", opts: ["810", "760", "645", "920"], ans: 0 },
+            { id: 26, sit: sit5, q: "Which of the following most nearly gives the bar force AH, in Newtons.", opts: ["810", "1900", "645", "2678"], ans: 3 },
+            { id: 27, sit: sit5, q: "Which of the following most nearly gives the bar force JD, in Newtons.", opts: ["760", "810", "640", "920"], ans: 2 },
+            { id: 28, sit: sit6, q: "Which of the following most nearly gives time, in seconds, when the block starts to slide.", opts: ["2.34", "2.25", "1.76", "3.21"], ans: 1 },
+            { id: 29, sit: sit6, q: "Which of the following most nearly gives the velocity of the block, in meters per second, after five seconds.", opts: ["24.5", "12.1", "14.6", "18.3"], ans: 2 },
+            { id: 30, sit: sit6, q: "Which of the following most nearly gives the distance traveled by the block, in meters per second, after five seconds.", opts: ["16.6", "12.2", "18.5", "10.8"], ans: 0 },
+            { id: 31, sit: sit7, q: "Which of the following gives the y-component of P in kN.", opts: ["187.4", "113.8", "143.2", "121.9"], ans: 3 },
+            { id: 32, sit: sit7, q: "Which of the following gives the z-component of P in kN.", opts: ["267.3", "243.8", "252.3", "198.9"], ans: 1 },
+            { id: 33, sit: sit7, q: "Which of the following gives the angle that P makes with x-axis, in degrees.", opts: ["53.3", "43.2", "34.2", "67.5"], ans: 0 },
+            { id: 34, sit: null, q: "A solid circular shaft is to be designed to carry torque of 750 N-m and a bending moment of 5000 N-m. Determine the diameter of the shaft without exceeding a shearing stress of 70 MPa and flexural stress of 120 MPa.", opts: ["75.3 mm", "73.5 mm", "71.5 mm", "72.1 mm"], ans: 0 },
+            { id: 35, sit: null, q: "If the principal stresses on a body are f1 = 40 MPa, f2 = -70 MPa, and f3 = 60 MPa, what is the maximum shear stress?", opts: ["10 MPa", "20 MPa", "55 MPa", "65 MPa"], ans: 3 },
+            { id: 36, sit: null, q: "An axial load 100 kN is applied to a flat bar 20 mm thick, tapering in width from 120 mm to 40 mm in a length of 10 m. Assume E = 200 GPa, determine the total elongation of the bar.", opts: ["3.43 mm", "2.125 mm", "4.33 mm", "1.985 mm"], ans: 0 },
+            { id: 37, sit: sit8, q: "Which of the following most nearly gives the maximum positive moment?", opts: ["900 N-m", "480 N-m", "1800 N-m", "2700 N-m"], ans: 2 },
+            { id: 38, sit: sit8, q: "Which of the following most nearly gives the maximum negative moment on the beam?", opts: ["1800 N-m", "480 N-m", "0 N-m", "-900 N-m"], ans: 1 },
+            { id: 39, sit: sit8, q: "Which of the following most nearly gives the location of the point of infliction from the right end of the beam?", opts: ["0.36 m", "1.64 m", "6.32 m", "2.35 m"], ans: 3 },
+            { id: 40, sit: sit9, q: "Which of the following most nearly gives the depth in mm of the compression block from the top of the beam.", opts: ["45.8", "37.5", "95.5", "115.4"], ans: 1 },
+            { id: 41, sit: sit9, q: "Which of the following most nearly gives the total compressive force in concrete in kN.", opts: ["1380", "1840", "1220", "1540"], ans: 2 },
+            { id: 42, sit: sit9, q: "Which of the following nearly gives the ultimate moment capacity of the section in kN-m.", opts: ["450", "750", "550", "650"], ans: 3 },
+            { id: 43, sit: sit10, q: "The truss in figure Situation 8, 28.", opts: ["statically determinate", "statically indeterminate to the second degree", "statically indeterminate to the first degree", "internally unstable"], ans: 2 },
+            { id: 44, sit: sit10, q: "The truss in figure Situation 8, 29.", opts: ["statically determinate", "statically indeterminate to the second degree", "statically indeterminate to the first degree", "internally unstable"], ans: 3 },
+            { id: 45, sit: sit10, q: "The truss in figure situation 8, 30.", opts: ["statically determinate", "statically indeterminate to the second degree", "statically indeterminate to the first degree", "internally unstable"], ans: 0 },
+            { id: 46, sit: sit11, q: "Which of the following most nearly gives the vertical reaction at B in kN.", opts: ["300", "350", "250", "450"], ans: 0 },
+            { id: 47, sit: sit11, q: "Which of the following most nearly gives the total reaction at A in kN.", opts: ["550", "400", "650", "500"], ans: 3 },
+            { id: 48, sit: sit11, q: "Which of the following most nearly gives the axial force in member AC in kN.", opts: ["432.5", "278.5", "324.1", "567.3"], ans: 2 },
+            { id: 49, sit: sit12, q: "Which of the following most nearly gives the vertical deviation of point B relative to the tangent drawn at A in mm.", opts: ["1.97", "0.75", "3.86", "2.47"], ans: 0 },
+            { id: 50, sit: sit12, q: "Which of the following most nearly gives the vertical deviation of point D relative to the tangent drawn at A in mm.", opts: ["0.72", "3.58", "2.73", "1.13"], ans: 3 },
+            { id: 51, sit: sit12, q: "Which of the following most nearly gives the vertical deflection at D in mm.", opts: ["0.187", "0.342", "0.058", "0.275"], ans: 1 },
+            { id: 52, sit: null, q: "A 10 m steel wide flange beam is laterally supported. The width of the web of the beam is 700 mm and web thickness is 10 mm. If fy is equal to 250 MPa, the allowable bending stress is:", opts: ["180 MPa", "150 MPa", "165 MPa", "200 MPa"], ans: 2 },
+            { id: 53, sit: null, q: "The structural I-beam supporting floor carries a floor load of 4.6 kN/m². The beams span is 6.0 m and are simply supported at their ends. Determine the centerline spacing if the allowable stress in the beam is 120 MPa and the section modulus is 534 x 10³ mm³.", opts: ["3.75 m", "3.45 m", "4.0 m", "3.0 m"], ans: 3 },
+            { id: 54, sit: null, q: "A BW 775 x 287 steel I beam has the following dimensions: H = 775 mm, tw = 19 mm, B = 360 mm, tf = 32 mm. The moment of inertia Ix about the principal axis as:", opts: ["375,086 cm⁴", "375,086 mm⁶", "375,086 mm⁴", "none in the list"], ans: 2 },
+            { id: 55, sit: sit13, q: "Which of the following most nearly gives the maximum reinforcement ratio according to 1992 NSCP?", opts: ["0.045", "0.036", "0.015", "0.028"], ans: 0 },
+            { id: 56, sit: sit13, q: "Which of the following most nearly gives the required tension steel area in square mm.", opts: ["3450", "2680", "3690", "3250"], ans: 1 },
+            { id: 57, sit: sit13, q: "Using 25 mm diameter bar, which of the following gives the required number of bars for the beam.", opts: ["4", "8", "6", "7"], ans: 2 },
+            { id: 58, sit: sit14, q: "Which of the following most nearly gives the stress at the bottom of the beam at midspan.", opts: ["-4 MPa", "-3 MPa", "-2 MPa", "-11 MPa"], ans: 1 },
+            { id: 59, sit: sit14, q: "Which of the following most nearly gives the stress at the top of the beam at midspan.", opts: ["-11 MPa", "-3 MPa", "-4 MPa", "-2 MPa"], ans: 0 },
+            { id: 60, sit: sit14, q: "If a concentrated load P is to be applied at midspan, which of the following most nearly gives the value of P so that the stress at the bottom of the beam at midspan is zero.", opts: ["52 kN", "24 kN", "36 kN", "47 kN"], ans: 3 },
+            { id: 61, sit: sit15, q: "Which of the following sections gives the largest allowable compressive stress.", opts: ["2L 125 x 75 x 12", "2L 150 x 90 x 10", "2L 150 x 90 x 12", "Not enough data"], ans: 2 },
+            { id: 62, sit: sit15, q: "Which of the following sections gives the smallest allowable compressive stress.", opts: ["2L 125 x 75 x 12", "2L 150 x 90 x 10", "2L 150 x 90 x 12", "Not enough data"], ans: 0 },
+            { id: 63, sit: sit15, q: "Which of the following sections gives the most economical (lightest) section for the given load.", opts: ["2L 125 x 75 x 12", "2L 150 x 90 x 10", "2L 150 x 90 x 12", "Not enough data"], ans: 1 },
+            { id: 64, sit: sit16, q: "Which of the following gives the clear spacing between the horizontal bars in mm.", opts: ["28", "18", "25", "23"], ans: 0 },
+            { id: 65, sit: sit16, q: "Which of the following gives the narrowest possible dimension in mm (width) of the forms for the given bar arrangement.", opts: ["256", "261", "266", "261"], ans: 1 },
+            { id: 66, sit: sit16, q: "Which of the following gives the maximum size in mm of coarse aggregates that may be used for the beam.", opts: ["16", "54", "36", "21"], ans: 3 },
+            { id: 67, sit: sit17, q: "Which of the following most nearly gives the section modulus of the beam's section.", opts: ["4,900,000 mm³", "4,300,000 mm³", "3,400,000 mm³", "5,100,000 mm³"], ans: 1 },
+            { id: 68, sit: sit17, q: "Which of the following most nearly gives the plastic section modulus of the beam's section.", opts: ["5,560,000 mm³", "5,120,000 mm³", "4,550,000 mm³", "6,130,000 mm³"], ans: 0 },
+            { id: 69, sit: sit17, q: "Which of the following most nearly gives the shape factor of the section.", opts: ["1.8", "1.1", "1.3", "1.5"], ans: 2 },
+            { id: 70, sit: sit18, q: "Which of the following gives the value of P so that the allowable bearing stress in rivets will not be exceeded.", opts: ["285.7 kN", "214.5 kN", "236.8 kN", "257.7 kN"], ans: 2 },
+            { id: 71, sit: sit18, q: "Which of the following gives the value of P so that the allowable tensile stress in the plates will not be exceeded.", opts: ["302.5 kN", "254.8 kN", "298.3 kN", "280.5 kN"], ans: 3 },
+            { id: 72, sit: sit18, q: "Which of the following gives the safe value of P.", opts: ["124.6 kN", "114.3 kN", "280.5 kN", "236.8 kN"], ans: 0 }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            mode: 'intro', // intro, practice, exam, results
+            currentIdx: 0,
+            answers: new Array(quizData.length).fill(null),
+            sidebarOpen: window.innerWidth >= 1024
+        };
+
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Handle Window Resize for Sidebar
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024 && !state.sidebarOpen) {
+                state.sidebarOpen = true;
+                updateSidebarClasses();
+            } else if (window.innerWidth < 1024 && state.sidebarOpen) {
+                state.sidebarOpen = false;
+                updateSidebarClasses();
+            }
+        });
+
+        // --- CONTROLLERS ---
+
+        function startApp(selectedMode) {
+            state.mode = selectedMode;
+            state.currentIdx = 0;
+            state.answers = new Array(quizData.length).fill(null);
+            
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            
+            updateHeader();
+            renderQuestion();
+            renderSidebar();
+        }
+
+        function goHome() {
+            if(state.mode !== 'results') {
+                if (!confirm("Are you sure you want to return to the home screen? Your progress will be lost.")) return;
+            }
+            
+            state.mode = 'intro';
+            document.getElementById('intro-screen').classList.remove('hidden');
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.add('hidden');
+            if(window.innerWidth < 1024) {
+                state.sidebarOpen = false;
+                updateSidebarClasses();
+            }
+        }
+
+        function setQuestion(idx) {
+            state.currentIdx = idx;
+            if (window.innerWidth < 1024) toggleSidebar();
+            renderQuestion();
+            renderSidebar();
+        }
+
+        function nextQuestion() {
+            if (state.currentIdx < quizData.length - 1) {
+                state.currentIdx++;
+                renderQuestion();
+                renderSidebar();
+            }
+        }
+
+        function prevQuestion() {
+            if (state.currentIdx > 0) {
+                state.currentIdx--;
+                renderQuestion();
+                renderSidebar();
+            }
+        }
+
+        function handleOptionClick(optIdx) {
+            if (state.mode === 'practice' && state.answers[state.currentIdx] !== null) return;
+
+            state.answers[state.currentIdx] = optIdx;
+            renderQuestion();
+            renderSidebar();
+            updateHeader();
+        }
+
+        function submitExam() {
+            if (confirm("Are you sure you want to finish and view your results?")) {
+                state.mode = 'results';
+                document.getElementById('quiz-screen').classList.add('hidden');
+                document.getElementById('results-screen').classList.remove('hidden');
+                renderResults();
+            }
+        }
+
+        function toggleSidebar() {
+            state.sidebarOpen = !state.sidebarOpen;
+            updateSidebarClasses();
+        }
+
+        function updateSidebarClasses() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (state.sidebarOpen) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // --- RENDER FUNCTIONS ---
+
+        function updateHeader() {
+            const answeredCount = state.answers.filter(a => a !== null).length;
+            document.getElementById('header-progress').innerText = `${answeredCount} / ${quizData.length} Answered`;
+            
+            const badge = document.getElementById('header-mode-badge');
+            badge.innerText = state.mode === 'practice' ? 'Practice Mode' : 'Exam Mode';
+
+            const submitBtn = document.getElementById('header-submit-btn');
+            submitBtn.innerText = state.mode === 'exam' ? 'Submit' : 'Finish';
+        }
+
+        function renderSidebar() {
+            const grid = document.getElementById('sidebar-grid');
+            grid.innerHTML = '';
+
+            quizData.forEach((q, i) => {
+                const isCurrent = i === state.currentIdx;
+                const hasAnswered = state.answers[i] !== null;
+                const isCorrect = hasAnswered && state.answers[i] === q.ans;
+                
+                let btnStyle = "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100";
+                
+                if (isCurrent) {
+                    btnStyle = "bg-blue-100 text-blue-800 border-blue-400 font-bold ring-2 ring-blue-400 ring-offset-1";
+                } else if (hasAnswered) {
+                    if (state.mode === 'practice') {
+                        btnStyle = isCorrect ? "bg-green-100 text-green-800 border-green-300" : "bg-red-100 text-red-800 border-red-300";
+                    } else {
+                        btnStyle = "bg-slate-700 text-white border-slate-700";
+                    }
+                }
+
+                const btn = document.createElement('button');
+                btn.className = `w-12 h-12 flex items-center justify-center rounded-lg text-sm transition-all ${btnStyle}`;
+                btn.innerText = q.id;
+                btn.onclick = () => setQuestion(i);
+                grid.appendChild(btn);
+            });
+        }
+
+        function renderQuestion() {
+            const q = quizData[state.currentIdx];
+            const isPractice = state.mode === 'practice';
+            const isExam = state.mode === 'exam';
+            const hasAnswered = state.answers[state.currentIdx] !== null;
+
+            // Update Situation
+            const sitBox = document.getElementById('situation-box');
+            if (q.sit) {
+                sitBox.classList.remove('hidden');
+                document.getElementById('situation-text').innerText = q.sit;
+            } else {
+                sitBox.classList.add('hidden');
+            }
+
+            // Update Text
+            document.getElementById('question-number').innerText = `Question ${state.currentIdx + 1} of ${quizData.length}`;
+            document.getElementById('question-text').innerText = q.q;
+
+            // Navigation Buttons
+            document.getElementById('btn-prev').disabled = state.currentIdx === 0;
+            const btnNext = document.getElementById('btn-next');
+            const btnFinish = document.getElementById('btn-finish');
+            
+            if (state.currentIdx === quizData.length - 1) {
+                btnNext.classList.add('hidden');
+                btnFinish.classList.remove('hidden');
+                btnFinish.innerHTML = isExam ? 'Submit Exam' : 'Finish Practice';
+            } else {
+                btnNext.classList.remove('hidden');
+                btnFinish.classList.add('hidden');
+                btnNext.disabled = false;
+            }
+
+            // Render Options
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+
+            q.opts.forEach((opt, optIdx) => {
+                const isSelected = state.answers[state.currentIdx] === optIdx;
+                const isCorrectAns = q.ans === optIdx;
+
+                let optClass = "w-full text-left p-4 rounded-xl border-2 transition-all duration-200 flex items-center justify-between ";
+                let badgeClass = "w-8 h-8 flex items-center justify-center rounded-lg mr-4 font-bold text-sm transition-colors ";
+                let iconHtml = "";
+
+                if (isPractice && hasAnswered) {
+                    if (isCorrectAns) {
+                        optClass += "bg-green-50 border-green-500 text-green-900 shadow-sm";
+                        badgeClass += "bg-green-200 text-green-800";
+                        iconHtml = '<i data-lucide="check" class="w-5 h-5 text-green-600"></i>';
+                    } else if (isSelected) {
+                        optClass += "bg-red-50 border-red-400 text-red-900";
+                        badgeClass += "bg-red-200 text-red-800";
+                        iconHtml = '<i data-lucide="x" class="w-5 h-5 text-red-500"></i>';
+                    } else {
+                        optClass += "border-slate-100 bg-white text-slate-400 opacity-60";
+                        badgeClass += "bg-slate-100 text-slate-500";
+                    }
+                } else {
+                    if (isSelected) {
+                        optClass += "bg-blue-50 border-blue-500 text-blue-900 shadow-sm";
+                        badgeClass += "bg-blue-200 text-blue-800";
+                    } else {
+                        optClass += "bg-white border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50";
+                        badgeClass += "bg-slate-100 text-slate-500";
+                    }
+                }
+
+                const btn = document.createElement('button');
+                btn.className = optClass;
+                btn.disabled = isPractice && hasAnswered;
+                btn.onclick = () => handleOptionClick(optIdx);
+
+                btn.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="${badgeClass}">${String.fromCharCode(65 + optIdx)}</span>
+                        <span class="text-lg">${opt}</span>
+                    </div>
+                    ${iconHtml}
+                `;
+                optsContainer.appendChild(btn);
+            });
+
+            lucide.createIcons();
+        }
+
+        function renderResults() {
+            const score = state.answers.filter((a, i) => a === quizData[i].ans).length;
+            const percentage = Math.round((score / quizData.length) * 100);
+
+            document.getElementById('score-percentage').innerText = `${percentage}%`;
+            document.getElementById('score-text').innerText = `You scored ${score} out of ${quizData.length}`;
+
+            const list = document.getElementById('results-list');
+            list.innerHTML = '';
+
+            quizData.forEach((q, i) => {
+                const userAns = state.answers[i];
+                const isCorrect = userAns === q.ans;
+                const isUnanswered = userAns === null;
+
+                const wrapperClass = `p-4 rounded-lg border ${isCorrect ? 'bg-green-50 border-green-200' : isUnanswered ? 'bg-slate-50 border-slate-200' : 'bg-red-50 border-red-200'}`;
+                const userAnsText = isUnanswered ? 'None' : q.opts[userAns];
+                const userAnsColor = isCorrect ? 'text-green-700' : 'text-red-700';
+                
+                let correctBlock = '';
+                if (!isCorrect) {
+                    correctBlock = `
+                        <div class="flex items-start">
+                            <span class="text-slate-500 w-24 flex-shrink-0">Correct:</span>
+                            <span class="font-semibold text-green-700">${q.opts[q.ans]}</span>
+                        </div>
+                    `;
+                }
+
+                const iconHtml = isCorrect 
+                    ? '<i data-lucide="check-circle" class="text-green-500 w-6 h-6"></i>' 
+                    : '<i data-lucide="x" class="text-red-500 w-6 h-6"></i>';
+
+                list.innerHTML += `
+                    <div class="${wrapperClass}">
+                        <div class="flex items-start">
+                            <div class="font-bold text-slate-500 w-8 flex-shrink-0">${q.id}.</div>
+                            <div class="flex-1">
+                                <p class="text-slate-800 font-medium mb-3">${q.q}</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                                    <div class="flex items-start">
+                                        <span class="text-slate-500 w-24 flex-shrink-0">Your Answer:</span>
+                                        <span class="font-semibold ${userAnsColor}">${userAnsText}</span>
+                                    </div>
+                                    ${correctBlock}
+                                </div>
+                            </div>
+                            <div class="ml-4 flex-shrink-0">
+                                ${iconHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            lucide.createIcons();
+            // Scroll to top of results
+            document.getElementById('results-screen').scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
